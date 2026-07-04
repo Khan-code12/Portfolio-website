@@ -1,305 +1,343 @@
-import { useState, ReactNode } from "react";
-import { motion } from "motion/react";
-import {
-  FileCode, Palette, Wind, Layers, Code, Cpu, Zap, Server, Terminal, Link,
-  ShieldCheck, Database, GitBranch, Github, Laptop, CheckSquare, Lightbulb,
-  MessageSquare, Users, Award, Clock, Play, RefreshCw, Table, Activity,
-  Globe, Key, UserCheck, Sliders, AlertTriangle, Lock, Cookie, Calendar,
-  DatabaseBackup, HardDrive, GitFork, Network, Maximize2, Workflow, Search,
-  Filter, ArrowDown, Settings, Package, GitMerge, Compass, Grid, Heart,
-  FileText, Binary, Boxes, Smartphone, EyeOff, BadgeCheck, Share2,
-  CloudLightning, Cloud, Sparkles, MessageCircle, Brain, Folder, Fingerprint,
-  Bot, Shuffle, TrendingUp, Flame, Box, BookOpen, BrainCircuit, RotateCcw
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { 
+  Code2, Monitor, Server, Database, Cpu, Cloud, Terminal, 
+  Layers, Sparkles, Shield, Bookmark, CheckCircle2 
 } from "lucide-react";
-import { skillCategories } from "../data";
-import { Skill } from "../types";
+
+interface SkillCategory {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  iconColor: string;
+  borderColor: string;
+  glowColor: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeHoverBorder: string;
+  skills: string[];
+  filterGroup: "all" | "core" | "ai-backend" | "infra";
+}
 
 export default function Skills() {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeFilter, setActiveFilter] = useState<"all" | "core" | "ai-backend" | "infra">("all");
+  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
 
-  const iconMap: Record<string, ReactNode> = {
-    Html5: <FileCode className="h-5 w-5 text-amber-500" />,
-    Css3: <Palette className="h-5 w-5 text-blue-500" />,
-    Wind: <Wind className="h-5 w-5 text-sky-400" />,
-    Layers: <Layers className="h-5 w-5 text-indigo-400" />,
-    Code: <Code className="h-5 w-5 text-yellow-500" />,
-    Cpu: <Cpu className="h-5 w-5 text-cyan-400" />,
-    Zap: <Zap className="h-5 w-5 text-yellow-400" />,
-    Server: <Server className="h-5 w-5 text-emerald-400" />,
-    Terminal: <Terminal className="h-5 w-5 text-slate-300" />,
-    Link: <Link className="h-5 w-5 text-teal-400" />,
-    ShieldCheck: <ShieldCheck className="h-5 w-5 text-rose-400" />,
-    Database: <Database className="h-5 w-5 text-emerald-500" />,
-    DatabaseBackup: <DatabaseBackup className="h-5 w-5 text-green-500" />,
-    Coins: <Layers className="h-5 w-5 text-amber-400" />,
-    SquarePlay: <Play className="h-5 w-5 text-red-500" />,
-    Settings: <Settings className="h-5 w-5 text-slate-400" />,
-    GitBranch: <GitBranch className="h-5 w-5 text-orange-500" />,
-    Github: <Github className="h-5 w-5 text-white" />,
-    Laptop: <Laptop className="h-5 w-5 text-cyan-500" />,
-    CheckSquare: <CheckSquare className="h-5 w-5 text-emerald-400" />,
-    Figma: <Palette className="h-5 w-5 text-pink-500" />,
-    Lightbulb: <Lightbulb className="h-5 w-5 text-yellow-300" />,
-    MessageSquare: <MessageSquare className="h-5 w-5 text-sky-500" />,
-    Users: <Users className="h-5 w-5 text-indigo-400" />,
-    Award: <Award className="h-5 w-5 text-amber-500" />,
-    Clock: <Clock className="h-5 w-5 text-teal-400" />,
-    RefreshCw: <RefreshCw className="h-5 w-5 text-sky-500" />,
-    Table: <Table className="h-5 w-5 text-indigo-500" />,
-    Activity: <Activity className="h-5 w-5 text-rose-500" />,
-    Globe: <Globe className="h-5 w-5 text-emerald-400" />,
-    Key: <Key className="h-5 w-5 text-yellow-400" />,
-    UserCheck: <UserCheck className="h-5 w-5 text-cyan-400" />,
-    Sliders: <Sliders className="h-5 w-5 text-slate-400" />,
-    AlertTriangle: <AlertTriangle className="h-5 w-5 text-amber-500" />,
-    Lock: <Lock className="h-5 w-5 text-rose-500" />,
-    Cookie: <Cookie className="h-5 w-5 text-amber-600" />,
-    Calendar: <Calendar className="h-5 w-5 text-sky-400" />,
-    HardDrive: <HardDrive className="h-5 w-5 text-slate-400" />,
-    GitFork: <GitFork className="h-5 w-5 text-orange-400" />,
-    Network: <Network className="h-5 w-5 text-cyan-400" />,
-    Maximize2: <Maximize2 className="h-5 w-5 text-indigo-400" />,
-    Workflow: <Workflow className="h-5 w-5 text-blue-400" />,
-    SearchCode: <Search className="h-5 w-5 text-indigo-400" />,
-    Filter: <Filter className="h-5 w-5 text-cyan-400" />,
-    ArrowDownAZ: <ArrowDown className="h-5 w-5 text-slate-300" />,
-    Package: <Package className="h-5 w-5 text-amber-400" />,
-    GitMerge: <GitMerge className="h-5 w-5 text-orange-400" />,
-    Compass: <Compass className="h-5 w-5 text-rose-400" />,
-    Grid: <Grid className="h-5 w-5 text-violet-400" />,
-    Heart: <Heart className="h-5 w-5 text-rose-500" />,
-    FileText: <FileText className="h-5 w-5 text-sky-400" />,
-    Binary: <Binary className="h-5 w-5 text-blue-500" />,
-    Boxes: <Boxes className="h-5 w-5 text-indigo-400" />,
-    Smartphone: <Smartphone className="h-5 w-5 text-emerald-400" />,
-    EyeOff: <EyeOff className="h-5 w-5 text-rose-400" />,
-    BadgeCheck: <BadgeCheck className="h-5 w-5 text-emerald-400" />,
-    Share2: <Share2 className="h-5 w-5 text-teal-400" />,
-    CloudLightning: <CloudLightning className="h-5 w-5 text-cyan-400" />,
-    Cloud: <Cloud className="h-5 w-5 text-sky-400" />,
-    Play: <Play className="h-5 w-5 text-emerald-400" />,
-    Sparkles: <Sparkles className="h-5 w-5 text-yellow-300" />,
-    MessageCircle: <MessageCircle className="h-5 w-5 text-sky-400" />,
-    Brain: <Brain className="h-5 w-5 text-pink-400" />,
-    FolderSearch: <Folder className="h-5 w-5 text-indigo-400" />,
-    Search: <Search className="h-5 w-5 text-sky-400" />,
-    Fingerprint: <Fingerprint className="h-5 w-5 text-teal-400" />,
-    Bot: <Bot className="h-5 w-5 text-indigo-400" />,
-    Shuffle: <Shuffle className="h-5 w-5 text-slate-400" />,
-    TrendingUp: <TrendingUp className="h-5 w-5 text-rose-400" />,
-    Flame: <Flame className="h-5 w-5 text-orange-500" />,
-    Box: <Box className="h-5 w-5 text-slate-400" />,
-    BookOpen: <BookOpen className="h-5 w-5 text-emerald-400" />,
-    BrainCircuit: <Cpu className="h-5 w-5 text-cyan-400" />,
-    FileJson: <FileCode className="h-5 w-5 text-indigo-400" />,
-    Chrome: <Globe className="h-5 w-5 text-emerald-400" />,
-    Container: <Box className="h-5 w-5 text-sky-400" />,
-  };
+  const filterTabs = [
+    { id: "all", label: "All Expertises" },
+    { id: "ai-backend", label: "AI & Backend" },
+    { id: "core", label: "Frontend & Architecture" },
+    { id: "infra", label: "DevOps & Databases" },
+  ] as const;
 
-  const getIcon = (iconName: string) => {
-    return iconMap[iconName] || <Code className="h-5 w-5 text-blue-400" />;
-  };
-
-  const getExperienceLevel = (level: number) => {
-    if (level >= 90) return "Expert";
-    if (level >= 80) return "Advanced";
-    if (level >= 70) return "Intermediate";
-    return "Learning";
-  };
-
-  // Stats Counters as requested
-  const statsCounters = [
+  const skillCategories: SkillCategory[] = [
     {
-      value: "25+",
-      label: "Technologies Learned",
-      desc: "In-depth expertise across modern stacks",
-      gradient: "from-blue-500 to-cyan-400",
-      icon: <Cpu className="h-6 w-6 text-cyan-400 animate-pulse" />
+      id: "languages",
+      title: "Core Languages",
+      description: "Foundational programming and scripting languages for building reliable full-stack applications.",
+      icon: <Code2 className="h-5 w-5" />,
+      iconColor: "text-amber-400",
+      borderColor: "group-hover:border-amber-500/30",
+      glowColor: "rgba(245, 158, 11, 0.05)",
+      badgeBg: "bg-amber-500/5",
+      badgeText: "text-amber-200 group-hover:text-amber-100",
+      badgeHoverBorder: "hover:border-amber-500/30 hover:bg-amber-500/10",
+      filterGroup: "core",
+      skills: ["TypeScript", "JavaScript (ES6+)", "SQL"]
     },
     {
-      value: "50+",
-      label: "Programming Problems Solved",
-      desc: "Strong logical, analytical & coding skills",
-      gradient: "from-purple-500 to-pink-500",
-      icon: <Award className="h-6 w-6 text-pink-400" />
+      id: "ai-engineering",
+      title: "AI Engineering",
+      description: "Building intelligent applications using large language models, agent frameworks, vector space semantic search, and automation.",
+      icon: <Cpu className="h-5 w-5" />,
+      iconColor: "text-purple-400",
+      borderColor: "group-hover:border-purple-500/30",
+      glowColor: "rgba(168, 85, 247, 0.05)",
+      badgeBg: "bg-purple-500/5",
+      badgeText: "text-purple-200 group-hover:text-purple-100",
+      badgeHoverBorder: "hover:border-purple-500/30 hover:bg-purple-500/10",
+      filterGroup: "ai-backend",
+      skills: [
+        "OpenAI API",
+        "LangChain",
+        "Retrieval-Augmented Generation (RAG)",
+        "Vector Embeddings",
+        "Semantic Search",
+        "pgvector",
+        "AI Chatbot Development",
+        "Prompt Engineering",
+        "n8n Automation"
+      ]
     },
     {
-      value: "10+",
-      label: "Full Stack Projects Built",
-      desc: "Robust production-ready web apps",
-      gradient: "from-emerald-500 to-teal-400",
-      icon: <Zap className="h-6 w-6 text-emerald-400" />
+      id: "backend",
+      title: "Backend Engineering",
+      description: "Architecting secure, scale-ready APIs, solid user authentication strategies, and integrated payment processors.",
+      icon: <Server className="h-5 w-5" />,
+      iconColor: "text-cyan-400",
+      borderColor: "group-hover:border-cyan-500/30",
+      glowColor: "rgba(34, 211, 238, 0.05)",
+      badgeBg: "bg-cyan-500/5",
+      badgeText: "text-cyan-200 group-hover:text-cyan-100",
+      badgeHoverBorder: "hover:border-cyan-500/30 hover:bg-cyan-500/10",
+      filterGroup: "ai-backend",
+      skills: [
+        "Node.js",
+        "Express.js",
+        "REST API Development",
+        "JWT Authentication",
+        "Role-Based Access Control (RBAC)",
+        "Prisma ORM",
+        "Zod Validation",
+        "Nodemailer",
+        "Cloudinary",
+        "Stripe API"
+      ]
     },
     {
-      value: "∞",
-      label: "Always Learning",
-      desc: "Upgrading daily with new technologies",
-      gradient: "from-amber-500 to-orange-500",
-      icon: <Flame className="h-6 w-6 text-orange-400" />
+      id: "frontend",
+      title: "Frontend Engineering",
+      description: "Crafting beautiful, pixel-perfect, highly responsive interfaces optimized for performance and fluid UX transitions.",
+      icon: <Monitor className="h-5 w-5" />,
+      iconColor: "text-pink-400",
+      borderColor: "group-hover:border-pink-500/30",
+      glowColor: "rgba(236, 72, 153, 0.05)",
+      badgeBg: "bg-pink-500/5",
+      badgeText: "text-pink-200 group-hover:text-pink-100",
+      badgeHoverBorder: "hover:border-pink-500/30 hover:bg-pink-500/10",
+      filterGroup: "core",
+      skills: [
+        "Next.js",
+        "React.js",
+        "Tailwind CSS",
+        "HTML5",
+        "CSS3",
+        "Shadcn UI",
+        "TanStack Query",
+        "TanStack Table",
+        "Axios"
+      ]
+    },
+    {
+      id: "database",
+      title: "Database Architecture",
+      description: "Structuring, indexing, and optimizing structured datasets to maximize query throughput and schema safety.",
+      icon: <Database className="h-5 w-5" />,
+      iconColor: "text-emerald-400",
+      borderColor: "group-hover:border-emerald-500/30",
+      glowColor: "rgba(16, 185, 129, 0.05)",
+      badgeBg: "bg-emerald-500/5",
+      badgeText: "text-emerald-200 group-hover:text-emerald-100",
+      badgeHoverBorder: "hover:border-emerald-500/30 hover:bg-emerald-500/10",
+      filterGroup: "infra",
+      skills: [
+        "PostgreSQL",
+        "Prisma ORM",
+        "Database Design",
+        "ER Diagram",
+        "SQL Query Optimization"
+      ]
+    },
+    {
+      id: "devops",
+      title: "DevOps & Cloud Systems",
+      description: "Managing containerized applications, automating release workflows, and orchestrating secure cloud deployments.",
+      icon: <Cloud className="h-5 w-5" />,
+      iconColor: "text-blue-400",
+      borderColor: "group-hover:border-blue-500/30",
+      glowColor: "rgba(59, 130, 246, 0.05)",
+      badgeBg: "bg-blue-500/5",
+      badgeText: "text-blue-200 group-hover:text-blue-100",
+      badgeHoverBorder: "hover:border-blue-500/30 hover:bg-blue-500/10",
+      filterGroup: "infra",
+      skills: [
+        "Docker",
+        "Docker Compose",
+        "Nginx",
+        "AWS EC2",
+        "AWS S3",
+        "GitHub Actions",
+        "CI/CD"
+      ]
+    },
+    {
+      id: "tools",
+      title: "Developer Workspaces",
+      description: "Leveraging key orchestration systems, inspection suites, and IDE environments to accelerate workflow velocities.",
+      icon: <Terminal className="h-5 w-5" />,
+      iconColor: "text-teal-400",
+      borderColor: "group-hover:border-teal-500/30",
+      glowColor: "rgba(20, 184, 166, 0.05)",
+      badgeBg: "bg-teal-500/5",
+      badgeText: "text-teal-200 group-hover:text-teal-100",
+      badgeHoverBorder: "hover:border-teal-500/30 hover:bg-teal-500/10",
+      filterGroup: "infra",
+      skills: [
+        "Git",
+        "GitHub",
+        "Postman",
+        "VS Code",
+        "PgAdmin",
+        "Beekeeper Studio"
+      ]
+    },
+    {
+      id: "software-engineering",
+      title: "Software Engineering & Patterns",
+      description: "Executing modern production architectural paradigms, secure flows, and clean maintainable code principles.",
+      icon: <Layers className="h-5 w-5" />,
+      iconColor: "text-indigo-400",
+      borderColor: "group-hover:border-indigo-500/30",
+      glowColor: "rgba(99, 102, 241, 0.05)",
+      badgeBg: "bg-indigo-500/5",
+      badgeText: "text-indigo-200 group-hover:text-indigo-100",
+      badgeHoverBorder: "hover:border-indigo-500/30 hover:bg-indigo-500/10",
+      filterGroup: "core",
+      skills: [
+        "Authentication & Authorization",
+        "API Integration",
+        "RESTful Architecture",
+        "MVC Architecture",
+        "Error Handling",
+        "File Upload",
+        "Payment Gateway Integration",
+        "Email Verification",
+        "OTP Authentication",
+        "Responsive Web Design",
+        "Clean Code",
+        "Scalable Application Development"
+      ]
     }
   ];
 
-  const filteredCategories = activeCategory === "all"
-    ? skillCategories
-    : skillCategories.filter(cat => cat.id === activeCategory);
+  const filteredCategories = skillCategories.filter(
+    (cat) => activeFilter === "all" || cat.filterGroup === activeFilter
+  );
 
   return (
-    <section id="skills" className="py-24 relative overflow-hidden bg-slate-950">
-      {/* Decorative gradient backgrounds */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-blue-600/5 blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-indigo-600/5 blur-[140px] pointer-events-none"></div>
+    <section id="skills" className="py-28 relative overflow-hidden bg-[#050811] border-b border-slate-900/80">
+      {/* Background radial gradient glows representing the glassmorphic ambient environment */}
+      <div className="absolute top-1/4 left-1/12 w-[600px] h-[600px] rounded-full bg-cyan-950/10 blur-[160px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/12 w-[600px] h-[600px] rounded-full bg-purple-950/10 blur-[180px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 z-10 relative">
-        {/* Section Heading */}
-        <div className="flex flex-col items-center mb-16 text-center">
-          <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 mb-2 bg-cyan-950/40 px-3 py-1 rounded-full border border-cyan-800/30">
-            Professional Competencies
-          </span>
-          <h2 className="text-3xl md:text-5xl font-display font-bold text-white tracking-tight">
-            Expertise & <span className="text-blue-500">Skills Portfolio</span>
+      <div className="max-w-7xl mx-auto px-6 md:px-12 z-10 relative space-y-16">
+        
+        {/* Section Header */}
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20">
+            <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+            <span className="text-[10px] font-mono tracking-widest uppercase text-cyan-300 font-bold">
+              Technical Matrix
+            </span>
+          </div>
+          
+          <h2 className="text-3xl md:text-5xl font-display font-black text-white tracking-tight">
+            Technical Skills
           </h2>
-          <div className="h-1.5 w-16 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full mt-4"></div>
-          <p className="text-slate-400 max-w-2xl mt-4 text-sm md:text-base">
-            An overview of technical disciplines, languages, frameworks, and modern methodologies I leverage to design clean, high-performance software.
+          
+          <p className="text-slate-400 text-sm md:text-base leading-relaxed">
+            Organized tech-stack of language masteries, AI architectures, database schematics, DevOps procedures, and reliable software engineering patterns.
           </p>
         </div>
 
-        {/* 1. Interactive Counter Cards with Floating Animations */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-          {statsCounters.map((stat, idx) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              whileHover={{ y: -8, scale: 1.02 }}
-              className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl relative overflow-hidden group shadow-lg shadow-slate-950/50"
-            >
-              {/* Highlight background glow */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl group-hover:bg-blue-600/15 transition-all duration-300"></div>
-              
-              {/* Top Row with icon and dynamic gradient indicator */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/50">
-                  {stat.icon}
-                </div>
-                <div className={`h-1.5 w-12 bg-gradient-to-r ${stat.gradient} rounded-full`}></div>
-              </div>
-
-              {/* Stat Value & Label */}
-              <div className="space-y-1">
-                <h4 className={`text-3xl font-display font-extrabold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
-                  {stat.value}
-                </h4>
-                <p className="text-sm font-semibold text-slate-200 tracking-tight leading-snug">
-                  {stat.label}
-                </p>
-                <p className="text-xs text-slate-400 font-medium">
-                  {stat.desc}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* 2. Professional Category Filter Navigator */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-16 max-w-4xl mx-auto">
-          <button
-            onClick={() => setActiveCategory("all")}
-            className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium tracking-wide transition-all duration-300 cursor-pointer ${
-              activeCategory === "all"
-                ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
-                : "bg-slate-900/80 border border-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-900"
-            }`}
-          >
-            All Disciplines ({skillCategories.length})
-          </button>
-          {skillCategories.map((cat) => (
+        {/* Dynamic Category Group Filter Bar */}
+        <div className="flex flex-wrap justify-center items-center gap-2">
+          {filterTabs.map((tab) => (
             <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium tracking-wide transition-all duration-300 cursor-pointer ${
-                activeCategory === cat.id
-                  ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
-                  : "bg-slate-900/80 border border-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-900"
+              key={tab.id}
+              onClick={() => setActiveFilter(tab.id)}
+              className={`px-4.5 py-2 rounded-xl text-xs font-mono tracking-wide border transition-all cursor-pointer ${
+                activeFilter === tab.id
+                  ? "bg-gradient-to-r from-blue-600 to-cyan-600 border-cyan-500 text-white shadow-lg shadow-cyan-500/15"
+                  : "bg-slate-950/60 hover:bg-slate-900 border-slate-850 hover:border-slate-700 text-slate-400 hover:text-slate-200"
               }`}
             >
-              {cat.title}
+              {tab.label}
             </button>
           ))}
         </div>
 
-        {/* 3. Categorized Skill Bento Cards with Animated Borders and Glowing Effects */}
-        <motion.div
+        {/* Skills Grid - Glassmorphism Bento Grid Layout */}
+        <motion.div 
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {filteredCategories.map((cat, catIdx) => (
-            <motion.div
-              layout
-              key={cat.id}
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: Math.min(catIdx * 0.05, 0.3) }}
-              whileHover={{ y: -6 }}
-              className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800/80 hover:border-blue-500/30 transition-all duration-500 relative overflow-hidden group hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] backdrop-blur-xl"
-            >
-              {/* Dynamic animated neon-glowing top-right border accent */}
-              <div className="absolute top-0 right-0 w-32 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
-              <div className="absolute top-0 right-0 h-32 w-[2px] bg-gradient-to-b from-blue-500 via-indigo-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <AnimatePresence mode="popLayout">
+            {filteredCategories.map((category) => (
+              <motion.div
+                key={category.id}
+                layout
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.4 }}
+                style={{
+                  boxShadow: hoveredSkill ? `0 4px 30px rgba(0, 0, 0, 0.4)` : ""
+                }}
+                className={`group p-8 rounded-3xl bg-slate-900/20 backdrop-blur-md border border-slate-850/60 ${category.borderColor} transition-all duration-300 relative overflow-hidden flex flex-col justify-between`}
+              >
+                {/* Micro-glow localized backdrop */}
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{
+                    background: `radial-gradient(circle at 50% 20%, ${category.glowColor}, transparent 70%)`
+                  }}
+                />
 
-              {/* Title Header */}
-              <h4 className="text-lg font-display font-bold text-white border-b border-slate-800/60 pb-4 mb-6 flex items-center justify-between">
-                <span className="bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent group-hover:from-cyan-300 group-hover:to-blue-400 transition-all duration-300">
-                  {cat.title}
-                </span>
-                <span className="text-xs bg-slate-950/80 px-2.5 py-1 rounded-md border border-slate-800/50 text-slate-400 font-mono">
-                  {cat.skills.length} skills
-                </span>
-              </h4>
-
-              {/* Skill Items List */}
-              <div className="space-y-6 flex-1">
-                {cat.skills.map((skill) => (
-                  <div key={skill.name} className="group/item">
-                    {/* Icon, Title, Level Info */}
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <div className="flex items-center gap-2.5 text-slate-300 group-hover/item:text-white transition-colors">
-                        <span className="transition-transform duration-300 group-hover/item:scale-110">
-                          {getIcon(skill.iconName)}
-                        </span>
-                        <span className="font-semibold text-[13px] md:text-sm tracking-tight text-slate-200">
-                          {skill.name}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 group-hover/item:text-cyan-400 transition-colors">
-                          {getExperienceLevel(skill.level)}
-                        </span>
-                        <span className="font-mono text-xs font-bold text-slate-400 group-hover/item:text-cyan-300 transition-colors">
-                          {skill.level}%
-                        </span>
-                      </div>
+                <div className="space-y-4">
+                  {/* Category Header */}
+                  <div className="flex items-center gap-3.5">
+                    <div className={`p-2.5 rounded-xl bg-slate-950 border border-slate-800 ${category.iconColor}`}>
+                      {category.icon}
                     </div>
-
-                    {/* Progress Bar Container */}
-                    <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-900/60 p-[1px]">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.level}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1.2, ease: "easeOut" }}
-                        className="h-full bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 rounded-full"
-                      />
-                    </div>
+                    <h3 className="text-lg font-display font-extrabold text-slate-100 group-hover:text-white transition-colors">
+                      {category.title}
+                    </h3>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-          ))}
+
+                  {/* Category Description */}
+                  <p className="text-slate-400 text-xs md:text-sm leading-relaxed font-medium">
+                    {category.description}
+                  </p>
+                </div>
+
+                {/* Skill Badges Wrapper */}
+                <div className="flex flex-wrap gap-2.5 mt-6 z-10 relative">
+                  {category.skills.map((skill) => {
+                    const isHovered = hoveredSkill === skill;
+                    return (
+                      <motion.span
+                        key={skill}
+                        onMouseEnter={() => setHoveredSkill(skill)}
+                        onMouseLeave={() => setHoveredSkill(null)}
+                        whileHover={{ scale: 1.04 }}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-850 bg-slate-950/70 text-xs font-semibold tracking-wide transition-all duration-200 cursor-default ${category.badgeText} ${category.badgeHoverBorder}`}
+                      >
+                        <CheckCircle2 className={`h-3 w-3 shrink-0 transition-opacity duration-200 ${
+                          isHovered ? "opacity-100 text-cyan-400" : "opacity-40"
+                        }`} />
+                        {skill}
+                      </motion.span>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </motion.div>
+
+        {/* Summary Showcase Banner */}
+        <div className="p-8 rounded-3xl bg-gradient-to-r from-blue-950/10 via-slate-950/40 to-cyan-950/10 border border-slate-850/60 text-center space-y-4 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.02),transparent_60%)]" />
+          <h4 className="text-base font-display font-bold text-white relative z-10">
+            Recruiter Quick Peek
+          </h4>
+          <p className="text-slate-400 text-xs md:text-sm max-w-2xl mx-auto leading-relaxed relative z-10">
+            Fully proficient in writing robust type-safe code, developing AI agents via deep embeddings, creating structured database designs with PostgreSQL/Prisma, and setting up automated CI/CD microservices with AWS and Docker.
+          </p>
+        </div>
+
       </div>
     </section>
   );
